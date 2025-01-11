@@ -3,51 +3,75 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
-class VAE(nn.Module):
-    def __init__(self,
-                 num_channels: int,
-                 latent_dim: int
-                 ):
-        super(VAE, self).__init__()
-
-        #Encoder
-         # Encoder
-        self.encoder = nn.Sequential(
-            nn.Conv2d(1, 32, kernel_size=4, stride=2, padding=1),  # Output: 32x14x14
-            nn.ReLU(),
-            nn.Conv2d(32, 64, kernel_size=4, stride=2, padding=1),  # Output: 64x7x7
-            nn.ReLU(),
-            nn.Flatten()  # Flatten for the fully connected layers
-        )
-        self.fc_mean = nn.Linear(64 * 7 * 7, latent_dim)
-        self.fc_log_var = nn.Linear(64 * 7 * 7, latent_dim)
-        
-        # Decoder 
-        self.fc_decoder = nn.Linear(latent_dim, 64 * 7 * 7)
-        self.decoder = nn.Sequential(
-            nn.ConvTranspose2d(64, 32, kernel_size=4, stride=2, padding=1),  # Output: 32x14x14
-            nn.ReLU(),
-            nn.ConvTranspose2d(32, 1, kernel_size=4, stride=2, padding=1),  # Output: 1x28x28
-            nn.Sigmoid()
-        )
-
-    def encode(self, x):
-        h = self.encoder(x)
-        z_mean = self.fc_mean(h)
-        z_log_var = self.fc_log_var(h)
-        return z_mean, z_log_var
-    
-    def reparameterize(self, z_mean, z_log_var):
-        std = torch.exp(0.5 * z_log_var)
-        eps = torch.randn_like(std)
-        return z_mean + eps * std
-    
-    def decode(self, z):
-        h = self.fc_decoder(z).view(-1, 64, 7, 7)
-        return self.decoder(h)
+class Encoder(nn.Module):
+    def __init__(self, input_channels:int, latent_dim:int):
+        super(Encoder, self).__init__()
+        self.conv1 = nn.Conv2d(input_channels, 32, kernel_size=4, stride=2, padding=1)
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=4, stride=2, padding=1)
+        self.conv3 = nn.Conv2d(64, 128, kernel_size=4, stride=2, padding=1)
+        self.flatten = nn.Flatten()
+        self.fc_mu = nn.Linear(8192, latent_dim)
+        self.fc_log_var = nn.Linear(8192, latent_dim)
 
     def forward(self, x):
-        z_mean, z_log_var = self.encode(x)
-        z = self.reparameterize(z_mean, z_log_var)
-        recon_x = self.decode(z)
-        return recon_x, z_mean, z_log_var
+        x = F.relu(self.conv1(x))
+        x = F.relu(self.conv2(x))
+        x = F.relu(self.conv3(x))
+        x = self.flatten(x)
+        print(f"x.shape: {x.shape}")
+        mu = self.fc_mu(x)
+        log_var = self.fc_log_var(x)
+        return mu, log_var
+
+class Decoder(nn.Module):
+    def __init__(self, latent_dim:int, output_channels:int):
+        super(Decoder, self).__init__()
+        self.fc = nn.Linear(latent_dim, 128 * 4 * 4)
+        self.de_conv1 = nn.ConvTranspose2d(128, 64, kernel_size=4, stride=2, padding=1)
+        self.de_conv2 = nn.ConvTranspose2d(64, 32, kernel_size=4, stride=2, padding=1)
+        self.de_conv3 = nn.ConvTranspose2d(32, 16, kernel_size=4, stride=2, padding=1)  # Added intermediate layer
+        self.de_conv4 = nn.ConvTranspose2d(16, output_channels, kernel_size=4, stride=2, padding=1)  # Final layer
+
+    def forward(self, x):
+        x = F.relu(self.fc(x))
+        x = x.view(-1, 128, 4, 4)
+        x = F.relu(self.de_conv1(x))  # -> [-1, 64, 8, 8]
+        x = F.relu(self.de_conv2(x))  # -> [-1, 32, 16, 16]
+        x = F.relu(self.de_conv3(x))  # -> [-1, 16, 32, 32]
+        x_reconstructed = torch.sigmoid(self.de_conv4(x))  # -> [-1, output_channels, 64, 64]
+        return x_reconstructed
+
+class VAE(nn.Module):
+    def __init__(self, input_channels:int, latent_dim:int):
+        super(VAE, self).__init__()
+        self.encoder = Encoder(input_channels, latent_dim)
+        self.decoder = Decoder(latent_dim, input_channels)
+    
+    def reparameterize(self, mu:torch.Tensor, log_var:torch.Tensor) -> torch.Tensor:
+        std = torch.exp(0.5 * log_var)
+        eps = torch.randn_like(std)
+        return mu + eps * std
+
+    def forward(self, x):
+        print(f"x.shape: {x.shape}")
+        mu, log_var = self.encoder(x)
+        z = self.reparameterize(mu, log_var)
+        x_reconstructed = self.decoder(z)
+        return x_reconstructed, mu, log_var
+
+
+def vae_loss(reconstructed_x:torch.Tensor, x:torch.Tensor, mu:torch.Tensor, log_var:torch.Tensor) -> torch.Tensor:
+    reconstruction_loss = F.binary_cross_entropy(reconstructed_x, x, reduction='sum')
+    kl_divergence = -0.5 * torch.sum(1 + log_var - mu.pow(2) - log_var.exp())
+    return reconstruction_loss + kl_divergence
+
+
+if __name__ == "__main__":
+    vae = VAE(input_channels=3, latent_dim=10)
+    dummy_input = torch.randn(1, 3, 64, 64)
+    output, mu, log_var = vae(dummy_input)
+    assert output.shape == dummy_input.shape, "Output shape does not match input shape"
+    assert mu.shape == log_var.shape, "Mu and log_var shapes do not match"
+    assert mu.shape == (1, 10), "Mu shape is not (1, 10)"
+    assert log_var.shape == (1, 10), "Log_var shape is not (1, 10)"
+    print("All assertions passed")
