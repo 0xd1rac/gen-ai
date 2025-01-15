@@ -2,6 +2,11 @@
 - [ ] Planar Flows
 - [ ] NICE: Non-linear Independent Components Estimation
 - [ ] Real NVP: Density Estimation Using Real NVP
+- [ ] MAF: Masked Autoregressive Flows
+- [ ] IAF: Inverse Autoregressive Flows
+- [ ] Parallel Wavenet
+- [ ] MintNet
+- [ ] Gaussianization Flows
 - [ ] Glow: Generative Flow with Invertible 1x1 Convolutions
 - [ ] FFJORD: Free-form Continuous Dynamics for Scalable Reversible Generative Models
 - [ ] Neural ODEs: Neural Ordinary Differential Equations
