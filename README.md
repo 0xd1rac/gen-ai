@@ -20,6 +20,7 @@
 - [ ] GANs
 - [ ] DCGAN
 - [ ] WGAN
+- [ ] BiGAN
 - [ ] Improved Training of Wasserstein GANs
 - [ ] Conditional GANs (cGAN)
 - [ ] WGAN-GP
