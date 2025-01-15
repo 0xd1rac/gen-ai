@@ -1,4 +1,5 @@
 # Flow Models
+- [ ] Planar Flows
 - [ ] NICE: Non-linear Independent Components Estimation
 - [ ] Real NVP: Density Estimation Using Real NVP
 - [ ] Glow: Generative Flow with Invertible 1x1 Convolutions
