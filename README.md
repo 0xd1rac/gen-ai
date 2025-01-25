@@ -65,6 +65,11 @@
 - [ ] Self-Attention Generative Adversarial Networks
 
 # EBM
+- [ ] A Learning Algorithm for Boltzmann Machines (Ackley, Hinton, & Sejnowski, 1985)
+- [ ] Learning Representations by Back-Propagating Errors (Hinton, 1986)
+- [ ] Contrastive Divergence Learning (Hinton, 2002)
+- [ ] Energy-Based Generative Neural Networks (LeCun et al., 2006)
+- [ ] Learning with Energy-Based Models (LeCun, Chopra, Hadsell, 2006)
 - [ ] Energy-Based Models (Original EBM Paper)
 - [ ] Contrastive Divergence Learning
 - [ ] Boltzmann Machines: Learning and Inference
