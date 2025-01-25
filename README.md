@@ -2,6 +2,7 @@
 - [ ] Planar Flows
 - [ ] NICE: Non-linear Independent Components Estimation
 - [ ] Real NVP: Density Estimation Using Real NVP
+- [ ] FFJORD
 - [ ] MAF: Masked Autoregressive Flows
 - [ ] IAF: Inverse Autoregressive Flows
 - [ ] Parallel Wavenet
