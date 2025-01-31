@@ -1,3 +1,17 @@
+# Training Exercises
+- [ ] Train a Naieve Bayes classification model
+
+## Autoregression Models 
+- [ ] read and Implement FVSBN + train on mnist + inference
+- [ ] read and implement NADE + train on mnist + inference
+- [ ] read and implement RNADE  + train on mnist + infernece
+- [ ] read and implemenet pixel rnn + train on mnist + infernece
+- [ ] read and implemenet pixel cnn + train on mnist + infernece
+
+## VAE 
+- [ ] read and implement the VAE paper on mnist
+
+
 # VAE
 - [ ] Auto-Encoding Variational Bayes (Kingma & Welling, 2013/2014)
 - [ ] Stochastic Backpropagation and Approximate Inference in Deep Generative Models (Rezende et al., 2014)
