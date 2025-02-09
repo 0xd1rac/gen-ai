@@ -60,6 +60,9 @@
 - [ ] DCGAN
 - [ ] WGAN
 - [ ] BiGAN
+- [ ] SRGAN
+- [ ] ESRGAN
+- [ ] ProGAN
 - [ ] Improved Training of Wasserstein GANs
 - [ ] Conditional GANs (cGAN)
 - [ ] WGAN-GP
